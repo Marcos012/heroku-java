@@ -46,7 +46,7 @@ task copyToLib(type: Copy) {
     Move o jar da aplicacao (gerado pela task build) para a pasta raiz do projeto, que eh utilizada pelo Heroku
     para executar a aplicacao.
     """
-	from "${project(':app').buildDir}/libs/"
+	from(configurations.compile)
 	into "$rootDir/build/libs/"
 }
 
