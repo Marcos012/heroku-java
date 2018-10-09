@@ -1,0 +1,62 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.5.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'idea'
+
+group = 'com.heroku'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-devtools')
+	compile('org.postgresql:postgresql')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
+
+
+idea {
+	module {
+		downloadSources = true
+	}
+}
+
+task copyToLib(type: Copy) {
+	group = ' >>> HEROKU'
+	description = """
+    Move o jar da aplicacao (gerado pela task build) para a pasta raiz do projeto, que eh utilizada pelo Heroku
+    para executar a aplicacao.
+    """
+	from "${project(':app').buildDir}/libs/"
+	into "$rootDir/build/libs/"
+}
+
+task stage {
+	group = ' >>> HEROKU'
+	description = 'Task utilizada pelo Heroku para construi o jar da aplicacao antes de executa-lo.'
+	dependsOn = [':app:clean', ':app:build', 'copyToLib']
+}
+
+copyToLib.mustRunAfter(':app:build')
+
+build.mustRunAfter('clean')
+
